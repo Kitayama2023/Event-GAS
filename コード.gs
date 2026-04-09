@@ -121,3 +121,63 @@ function processEventEmails() {
     });
   });
 }
+
+// ▼▼▼ Code.gs の一番下に追加 ▼▼▼
+
+function createEventAndSendEmail(eventData) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('イベント一覧');
+
+  // 1. スプレッドシートに新しいイベントを追加
+  sheet.appendRow([
+    eventData.date,
+    eventData.title,
+    eventData.location,
+    eventData.description,
+    eventData.author,
+    '予定', // ステータス初期値
+    ''      // 完了コメント初期値
+  ]);
+
+// 2. メール送信処理（★固定アドレスへ送信するように変更）
+  const targetEmail = 'neropi-2022@yahoo.co.jp'; 
+
+  const subject = `【新着イベント】${eventData.title}`;
+  const body = `サークルの新しいイベントが投稿されました！
+
+【日付】${eventData.date}
+【イベント名】${eventData.title}
+【場所】${eventData.location}
+【投稿者】${eventData.author}
+
+【詳細】
+${eventData.description}
+
+※詳しくはサークルのイベント一覧サイトをご確認ください。
+`;
+
+  // 固定アドレス宛にメールを送信
+  MailApp.sendEmail(targetEmail, subject, body);
+
+  return true;
+}
+
+
+// ▼▼▼ Code.gs の末尾に追加 ▼▼▼
+
+function updateEvent(rowNumber, updatedData) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('イベント一覧');
+  
+  // 指定された行の A列(1)からD列(4)までを新しいデータで上書きする
+  // 順序: [日付, タイトル, 場所, 詳細]
+  const range = sheet.getRange(rowNumber, 1, 1, 4);
+  range.setValues([[
+    updatedData.date,
+    updatedData.title,
+    updatedData.location,
+    updatedData.description
+  ]]);
+  
+  return true;
+}
